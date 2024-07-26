@@ -10,7 +10,7 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() {
+func InitDB() *gorm.DB {
 	dsn := "jgdnwaaqhosting_tnqbao:Gau_12345@tcp(202.92.4.30:3306)/jgdnwaaqhosting_gau_service"
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -19,4 +19,5 @@ func InitDB() {
 	}
 	log.Println("Database connected")
 	DB.AutoMigrate(&models.User{}, &models.UserInformaiton{}, &models.UserAuthentication{})
+	return DB
 }
