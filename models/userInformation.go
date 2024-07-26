@@ -4,9 +4,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type userInformaiton struct {
+type UserInformaiton struct {
 	gorm.Model
-	userId uint   `gorm:"unique" json:"user_id"`
-	Name   string `json:"name"`
-	Phone  string ` json:"phone"`
+	UserId      uint   `gorm:"primaryKey" json:"user_id"`
+	Name        string `json:"name"`
+	Phone       string `gorm:"unique" json:"phone"`
+	Email       string `gorm:"unique" json:"email"`
+	DateOfBirth string `gorm:"unique" json:"date_of_birth"`
 }
