@@ -1,13 +1,8 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type UserAuthentication struct {
-	gorm.Model
-	UserId       uint   `gorm:"primaryKey" json:"user_id"`
-	Username     string `gorm:"unique"`
-	Password     string `gorm:"password"`
-	ExtenalToken string `gorm:"extenal_token"`
+	UserId        uint    `gorm:"primaryKey" json:"user_id"`
+	Username      *string `gorm:"unique" json:"username"`
+	Password      *string `gorm:"size:255" json:"password"`
+	ExternalToken *string `gorm:"size:255" json:"external_token"`
 }

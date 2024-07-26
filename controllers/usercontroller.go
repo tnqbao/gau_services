@@ -1,59 +1,52 @@
 package controllers
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/gorm"
 )
 
-type UserRequest struct {
-	Name          string `json:"name"`
-	Email         string `json:"email"`
-	Phone         string `json:"phone"`
-	DateOfBirth   string `json:"date_of_birth"`
-	Username      string `json:"username"`
-	Password      string `json:"password"`
-	ExternalToken string `json:"external_token"`
-}
-
-func CreateUser(c *gin.Context) {
+func CreateUser(c *gin.Context, r Request) {
 	db := c.MustGet("db").(*gorm.DB)
-	var req UserRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Println("UserRequest binding error:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "UserRequest binding error: " + err.Error()})
-		return
-	}
-	userInfo := models.UserInformaiton{
-		Name:        req.Name,
-		Email:       req.Email,
-		Phone:       req.Phone,
-		DateOfBirth: req.DateOfBirth,
-	}
 
 	userAuth := models.UserAuthentication{
-		Username:     req.Username,
-		Password:     req.Password,
-		ExtenalToken: req.ExternalToken,
+		Username:      r.Username,
+		Password:      r.Password,
+		ExternalToken: r.ExternalToken,
 	}
+	userInfor := models.UserInformation{}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		user := models.User{
-			UserToken: generateToken(),
+		user := models.User{}
+		var tokenSource *string
+		if r.Username != nil {
+			tokenSource = r.Username
+		} else {
+			tokenSource = r.ExternalToken
+		}
+		if tokenSource != nil {
+			user.UserToken = generateToken(*tokenSource)
+		} else {
+			user.UserToken = generateToken("default_token_source")
 		}
 		if err := tx.Create(&user).Error; err != nil {
 			return err
 		}
-		userInfo.UserId = user.ID
-		userAuth.UserId = user.ID
-		if err := tx.Create(&userInfo).Error; err != nil {
+
+		userAuth.UserId = user.UserId
+		userInfor.UserId = user.UserId
+
+		if err := tx.Create(&userAuth).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&userAuth).Error; err != nil {
+
+		if err := tx.Create(&userInfor).Error; err != nil {
 			return err
 		}
 
@@ -62,12 +55,15 @@ func CreateUser(c *gin.Context) {
 
 	if err != nil {
 		log.Println("Transaction error:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo người dùng: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot create user: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Người dùng đã được tạo thành công"})
+	c.JSON(http.StatusOK, gin.H{"message": "User successfully created"})
 }
-func generateToken() string {
-	return "random-token"
+
+func generateToken(para string) string {
+	h := md5.New()
+	h.Write([]byte(strings.ToLower(para)))
+	return hex.EncodeToString(h.Sum(nil))
 }

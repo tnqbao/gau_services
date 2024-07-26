@@ -9,10 +9,7 @@ import (
 func main() {
 
 	db := config.InitDB()
-
 	router := routes.SetupRouter(db)
-
 	router.Use(cors.Default())
-
 	router.Run(":8080")
 }
