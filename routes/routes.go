@@ -19,6 +19,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		userRoutes := apiRoutes.Group("/users")
 		{
 			userRoutes.POST("/register", controllers.Register)
+			userRoutes.GET("/:id", controllers.GetUserById)
 		}
 	}
 
