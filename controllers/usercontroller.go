@@ -120,3 +120,34 @@ func toString(value *string) string {
 	}
 	return *value
 }
+
+//DELETE USER
+
+func DeleteUserById(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB)
+	id := c.Param("id")
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if result := tx.Delete(&models.User{}, id); result.Error != nil {
+			return result.Error
+		} else if result.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+		if err := tx.Delete(&models.UserAuthentication{}, id).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&models.UserInformation{}, id).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
