@@ -21,7 +21,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "UserRequest binding error: " + err.Error()})
 		return
 	}
-
+	*req.Password = hashPassword(*req.Password)
 	if (req.Username == nil || req.Password == nil) && req.ExternalToken == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Either Username and Password or ExternalToken must be provided"})
 		return
