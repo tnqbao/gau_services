@@ -54,7 +54,7 @@ jobs:
 
         # Deploy
         ssh -o StrictHostKeyChecking=no -p $SERVER_PORT $SERVER_USER@$SERVER_HOST << 'EOF'
-          cd /path/to/your/application
+          cd /home/debian/gau/gau_services
           git pull origin main
           docker-compose down
           docker-compose up -d
