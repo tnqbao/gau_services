@@ -1,1 +1,2 @@
 .env
+./cotrollers/encrypt/test.go

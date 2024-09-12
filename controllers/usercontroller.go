@@ -12,8 +12,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type RequestReceive struct {
+	Username      *string `json:"Username"`
+	Password      *string `json:"Password"`
+	ExternalToken *string `json:"ExternalToken"`
+}
+
 // CREATE USER
-func CreateUser(c *gin.Context, r Request) {
+func CreateUser(c *gin.Context, r RequestReceive) {
 	db := c.MustGet("db").(*gorm.DB)
 
 	userAuth := models.UserAuthentication{
@@ -25,30 +31,19 @@ func CreateUser(c *gin.Context, r Request) {
 	userInfor := models.UserInformation{}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		user := models.User{}
-		var tokenSource *string
-		if r.Username != nil {
-			tokenSource = r.Username
-		} else {
-			tokenSource = r.ExternalToken
-		}
-		if tokenSource != nil {
-			user.UserToken = generateToken(*tokenSource)
-		} else {
-			user.UserToken = generateToken("default_token_source")
-		}
+		user.Permission = "member"
 		userAuth.UserId = user.UserId
 		userInfor.UserId = user.UserId
 
-		if err := tx.Create(&user).Error; err != nil {
+		if err := tx.Create(&userAuth).Error; err != nil {
 			return err
 		}
-		if err := tx.Create(&userAuth).Error; err != nil {
+		if err := tx.Create(&user).Error; err != nil {
 			return err
 		}
 		if err := tx.Create(&userInfor).Error; err != nil {
 			return err
 		}
-
 		return nil
 	})
 

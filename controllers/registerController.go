@@ -8,14 +8,8 @@ import (
 	"github.com/tnqbao/gau_services/controllers/encrypt"
 )
 
-type Request struct {
-	Username      *string `json:"Username"`
-	Password      *string `json:"Password"`
-	ExternalToken *string `json:"ExternalToken"`
-}
-
 func Register(c *gin.Context) {
-	var req Request
+	var req RequestReceive
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Println("UserRequest binding error:", err)

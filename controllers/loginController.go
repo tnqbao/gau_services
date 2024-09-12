@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -13,62 +15,64 @@ import (
 	"gorm.io/gorm"
 )
 
-type ClaimsSend struct {
-	UserID uint `json:"user_id"`
+type ClaimsResponse struct {
+	UserID     uint   `json:"user_id"`
+	Permission string `json:"permission"`
 	jwt.RegisteredClaims
 }
 
-type ClaimsReceive struct {
-	Username      string `json:"username"`
-	Password      string `json:"password"`
-	ExternalToken string `json:"external_token"`
+func getSecret(path string) string {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Error opening secret file: %v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() {
+		return scanner.Text()
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("Error reading secret file: %v", err)
+	}
+	return ""
 }
 
+var req RequestReceive
+
 func Authentication(c *gin.Context) {
-	jwtKey := os.Getenv("JWT_KEY")
-	if jwtKey == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Secret key not set"})
+	jwtKey := getSecret("/run/secrets/jwt_key")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Println("UserRequest binding error:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "UserRequest binding error: " + err.Error()})
 		return
 	}
-	jwtService := encrypt.NewJWTService(jwtKey)
-
-	fmt.Println("Secret Key:", jwtKey)
-
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Authorization header is required"})
+	if (req.Username == nil || req.Password == nil) && req.ExternalToken == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either Username and Password or ExternalToken must be provided"})
 		return
 	}
-	tokenString := authHeader[len("Bearer "):]
-	fmt.Println("Received Token:", tokenString)
 
-	var claims ClaimsReceive
-	err := jwtService.DecodeFromJWT(tokenString, &claims)
-	if err != nil {
-		fmt.Println("Token Decode Error:", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		return
-	}
-	fmt.Println("Decoded Claims:", claims)
+	if *req.Username != "" && *req.Password != "" {
+		hashedPassword := encrypt.HashPassword(*req.Password)
 
-	if claims.Username != "" && claims.Password != "" {
-		hashedPassword := encrypt.HashPassword(claims.Password)
-
-		user, err := verifyCredentials(c, claims.Username, hashedPassword)
+		user, err := verifyCredentials(c, *req.Username, hashedPassword)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 			return
 		}
 
 		expirationTime := time.Now().Add(24 * time.Hour)
-		claimsSend := &ClaimsSend{
-			UserID: user.UserId,
+		claimsResponse := &ClaimsResponse{
+			UserID:     user.UserId,
+			Permission: user.Permission,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(expirationTime),
 			},
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsSend)
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsResponse)
+		fmt.Println([]byte(jwtKey))
 		tokenString, err := token.SignedString([]byte(jwtKey))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
@@ -84,11 +88,15 @@ func Authentication(c *gin.Context) {
 	c.JSON(http.StatusBadRequest, gin.H{"error": "Username/Password or ExternalToken required"})
 }
 
-func verifyCredentials(c *gin.Context, username, password string) (models.UserAuthentication, error) {
-	var user models.UserAuthentication
+func verifyCredentials(c *gin.Context, username, password string) (models.User, error) {
+	var user models.User
 	db := c.MustGet("db").(*gorm.DB)
-	if err := db.Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
-		return user, err
+	if err := db.Table("user_authentications").
+		Select("users.user_id, users.permission").
+		Joins("inner join users on users.user_id = user_authentications.user_id").
+		Where("user_authentications.username = ? AND user_authentications.password = ?", username, password).
+		First(&user).Error; err != nil {
+		return models.User{}, err
 	}
 	return user, nil
 }

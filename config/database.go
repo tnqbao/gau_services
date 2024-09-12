@@ -1,11 +1,11 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,24 +13,37 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() *gorm.DB {
-	err := godotenv.Load()
+func getSecret(path string) string {
+	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error opening secret file: %v", err)
 	}
+	defer file.Close()
 
-	username_db := os.Getenv("USERNAME_DATABASE")
-	password_db := os.Getenv("PASSWORD_DATABASE")
-	address_db := os.Getenv("ADDRESS_DATABASE")
-	database_name := os.Getenv("DATABSE_NAME")
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() {
+		return scanner.Text()
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("Error reading secret file: %v", err)
+	}
+	return ""
+}
+
+func InitDB() *gorm.DB {
+	username_db := getSecret("/run/secrets/db_username")
+	password_db := getSecret("/run/secrets/db_password")
+	address_db := getSecret("/run/secrets/db_address")
+	database_name := getSecret("/run/secrets/db_name")
 
 	if username_db == "" || password_db == "" || address_db == "" || database_name == "" {
-		log.Fatal("One or more required environment variables are missing")
+		log.Fatal("One or more required secrets are missing")
 	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		username_db, password_db, address_db, database_name)
 
+	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
