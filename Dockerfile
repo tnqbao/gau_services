@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -8,6 +8,14 @@ RUN go mod download
 COPY . .
 
 RUN go build -o /app/main
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+COPY --from=builder /app/main /app/main
+
+WORKDIR /app
 
 EXPOSE 8080
 
