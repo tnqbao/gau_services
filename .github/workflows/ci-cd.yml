@@ -52,7 +52,7 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
 
         # Deploy
-        ssh -o StrictHostKeyChecking=no -p 22 $SERVER_USER@$SERVER_HOST << 'EOF'
+        ssh -o StrictHostKeyChecking=no -p $SERVER_PORT $SERVER_USER@$SERVER_HOST << 'EOF'
           cd /home/debian/gau/gau_services
           git pull origin main
           docker-compose down
