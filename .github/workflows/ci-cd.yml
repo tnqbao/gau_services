@@ -53,19 +53,19 @@ jobs:
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
-        SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      run: ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && git pull origin main"
+        # SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && git pull origin main"
 
     - name: Stop current Docker services
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
-        SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      run: ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && docker-compose down"
+        # SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && docker-compose down"
 
     - name: Start Docker services
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
-        SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      run: ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && docker-compose up -d"
+        # SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau/gau_services && docker-compose up -d"
