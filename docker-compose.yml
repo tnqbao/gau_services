@@ -50,6 +50,7 @@ secrets:
   gin_mode:
     external: true
 
+
 networks:
   app-network:
     driver: bridge
