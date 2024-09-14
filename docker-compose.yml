@@ -28,7 +28,7 @@ services:
       - db_address
       - db_name
       - jwt_key
-      - gin_mode
+
     networks:
       - app-network
     ports:
@@ -36,19 +36,17 @@ services:
 
 secrets:
   mysql_root_password:
-    external: true
+    file: /home/debian/.env/secrets/mysql_root_password.txt
   db_username:
-    external: true
+    file: /home/debian/.env/secrets/db_username.txt
   db_password:
-    external: true
+    file: /home/debian/.env/secrets/db_password.txt
   db_name:
-    external: true
+    file: /home/debian/.env/secrets/db_name.txt
   db_address:
-    external: true
+    file: /home/debian/.env/secrets/db_address.txt
   jwt_key:
-    external: true
-  gin_mode:
-    external: true
+    file: /home/debian/.env/secrets/jwt_key.txt
 
 networks:
   app-network:
