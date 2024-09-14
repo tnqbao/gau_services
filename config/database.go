@@ -1,10 +1,10 @@
 package config
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
+	"strings"
 
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/driver/mysql"
@@ -14,20 +14,11 @@ import (
 var DB *gorm.DB
 
 func getSecret(path string) string {
-	file, err := os.Open(path)
+	secret, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatalf("Error opening secret file: %v", err)
 	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	if scanner.Scan() {
-		return scanner.Text()
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error reading secret file: %v", err)
-	}
-	return ""
+	return strings.TrimSpace(string(secret))
 }
 
 func InitDB() *gorm.DB {

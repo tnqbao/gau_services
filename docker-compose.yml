@@ -22,6 +22,8 @@ services:
 
   golang-app:
     build: .
+    environment: 
+      
     secrets:
       - db_username
       - db_password
