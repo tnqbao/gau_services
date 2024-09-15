@@ -31,8 +31,8 @@ func InitDB() *gorm.DB {
 		log.Fatal("One or more required secrets are missing")
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(mysql:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		username_db, password_db, database_name)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		username_db, password_db, address_db, database_name)
 
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
