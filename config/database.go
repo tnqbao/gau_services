@@ -23,7 +23,7 @@ func getSecret(path string) string {
 
 func InitDB() *gorm.DB {
 	username_db := getSecret("/run/secrets/db_username")
-	password_db := getSecret("/run/secrets/db_password")
+	password_db := getSecret("/run/secrets/mysql_root_password")
 	address_db := getSecret("/run/secrets/db_address")
 	database_name := getSecret("/run/secrets/db_name")
 

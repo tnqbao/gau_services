@@ -58,7 +58,7 @@ func Authentication(c *gin.Context) {
 
 		user, err := verifyCredentials(c, *req.Username, hashedPassword)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+			c.JSON(http.StatusUnauthorized, gin.H{"Invalid username or password!"})
 			return
 		}
 
@@ -79,7 +79,7 @@ func Authentication(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("Generated Token:", tokenString)
+		fmt.Println("generated JWT token:", tokenString)
 
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 		return
