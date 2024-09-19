@@ -27,6 +27,7 @@ services:
     secrets:
       - db_username
       - mysql_root_password
+      - db_password
       - db_address
       - db_name
       - jwt_key
