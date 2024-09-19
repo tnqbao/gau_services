@@ -24,7 +24,7 @@ func getSecret(path string) string {
 func InitDB() *gorm.DB {
 	username_db := getSecret("/run/secrets/db_username")
 	password_db := getSecret("/run/secrets/mysql_root_password")
-	address_db := getSecret("/run/secrets/db_address")
+	address_db := "mysql"
 	database_name := getSecret("/run/secrets/db_name")
 
 	if username_db == "" || password_db == "" || address_db == "" || database_name == "" {
@@ -33,8 +33,7 @@ func InitDB() *gorm.DB {
 
 	fmt.Println("DB Username:", username_db)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		username_db, password_db, address_db, database_name)
+	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", password_db, database_name)
 
 	var err error
 
