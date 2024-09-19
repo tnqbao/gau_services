@@ -58,7 +58,9 @@ func Authentication(c *gin.Context) {
 
 		user, err := verifyCredentials(c, *req.Username, hashedPassword)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"Invalid username or password!"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid username or password!",
+			})
 			return
 		}
 
