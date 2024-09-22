@@ -24,7 +24,7 @@ func getSecret(path string) string {
 func InitDB() *gorm.DB {
 	mysql_user := getSecret("/run/secrets/mysql_user")
 	mysql_password := getSecret("/run/secrets/mysql_password")
-	mysql_host := getSecret("/run/secrets/mysql_host")
+	mysql_host := "mysql"
 	database_name := "gau_services_db"
 
 	if mysql_user == "" || mysql_password == "" || mysql_host == "" || database_name == "" {
