@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/tnqbao/gau_services/models"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -22,22 +22,22 @@ func getSecret(path string) string {
 }
 
 func InitDB() *gorm.DB {
-	mysql_user := getSecret("/run/secrets/mysql_user")
-	mysql_password := getSecret("/run/secrets/mysql_password")
-	mysql_host := "mysql"
+	pg_user := getSecret("/run/secrets/pg_user")
+	pg_password := getSecret("/run/secrets/pg_password")
+	pg_host := "postgres"
 	database_name := "gau_services_db"
 
-	if mysql_user == "" || mysql_password == "" || mysql_host == "" || database_name == "" {
+	if pg_user == "" || pg_password == "" || pg_host == "" || database_name == "" {
 		log.Fatal("One or more required secrets are missing")
 	}
 
-	fmt.Printf("DB connect status: %s:%s@tcp(%s:3306)/%s\n", mysql_user, mysql_password, mysql_host, database_name)
+	fmt.Printf("DB connect status: %s:%s@tcp(%s:5432)/%s\n", pg_user, pg_password, pg_host, database_name)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_user, mysql_password, mysql_host, database_name)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Ho_Chi_Minh", pg_host, pg_user, pg_password, database_name)
 
 	var err error
 
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
