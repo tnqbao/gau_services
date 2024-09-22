@@ -2,9 +2,8 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"strings"
+	"os"
 
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/driver/mysql"
@@ -13,27 +12,27 @@ import (
 
 var DB *gorm.DB
 
-func getSecret(path string) string {
-	secret, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatalf("Error opening secret file: %v", err)
+func getEnv(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		log.Fatalf("Environment variable %s is missing", key)
 	}
-	return strings.TrimSpace(string(secret))
+	return value
 }
 
 func InitDB() *gorm.DB {
-	username_db := getSecret("/run/secrets/db_username")
-	password_db := getSecret("/run/secrets/mysql_root_password")
-	address_db := "mysql"
-	database_name := getSecret("/run/secrets/db_name")
+	mysql_user := getEnv("MYSQL_USER")
+	mysql_password := getEnv("MYSQL_PASSWORD")
+	mysql_host := getEnv("MYSQL_HOST")
+	database_name := getEnv("MYSQL_DATABASE")
 
-	if username_db == "" || password_db == "" || address_db == "" || database_name == "" {
+	if mysql_user == "" || mysql_password == "" || mysql_host == "" || database_name == "" {
 		log.Fatal("One or more required secrets are missing")
 	}
 
-	fmt.Println("DB Username:", username_db)
+	fmt.Printf("DB connect status: %s:%s@tcp(%s:3306)/%s\n", mysql_user, mysql_password, mysql_host, database_name)
 
-	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", password_db, database_name)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysql_user, mysql_password, mysql_host, database_name)
 
 	var err error
 
