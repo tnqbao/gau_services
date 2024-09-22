@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/driver/mysql"
@@ -12,19 +13,19 @@ import (
 
 var DB *gorm.DB
 
-func getEnv(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Fatalf("Environment variable %s is missing", key)
+func getSecret(path string) string {
+	secret, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Error opening secret file: %v", err)
 	}
-	return value
+	return strings.TrimSpace(string(secret))
 }
 
 func InitDB() *gorm.DB {
-	mysql_user := getEnv("MYSQL_USER")
-	mysql_password := getEnv("MYSQL_PASSWORD")
-	mysql_host := getEnv("MYSQL_HOST")
-	database_name := getEnv("MYSQL_DATABASE")
+	mysql_user := getSecret("/run/secrets/mysql_user")
+	mysql_password := getSecret("/run/secrets/mysql_password")
+	mysql_host := getSecret("/run/secrets/mysql_host")
+	database_name := getSecret("/run/secrets/db_name")
 
 	if mysql_user == "" || mysql_password == "" || mysql_host == "" || database_name == "" {
 		log.Fatal("One or more required secrets are missing")
