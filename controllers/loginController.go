@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"net/http"
@@ -21,27 +20,10 @@ type ClaimsResponse struct {
 	jwt.RegisteredClaims
 }
 
-func getSecret(path string) string {
-	file, err := os.Open(path)
-	if err != nil {
-		log.Fatalf("Error opening secret file: %v", err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	if scanner.Scan() {
-		return scanner.Text()
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error reading secret file: %v", err)
-	}
-	return ""
-}
-
 var req RequestReceive
 
 func Authentication(c *gin.Context) {
-	jwtKey := getSecret("/run/secrets/jwt_key")
+	jwtKey := os.Getenv("JWT_SECRET")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Println("UserRequest binding error:", err)

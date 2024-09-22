@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/tnqbao/gau_services/models"
 	"gorm.io/driver/postgres"
@@ -13,17 +12,9 @@ import (
 
 var DB *gorm.DB
 
-func getSecret(path string) string {
-	secret, err := os.ReadFile(path)
-	if err != nil {
-		log.Fatalf("Error opening secret file: %v", err)
-	}
-	return strings.TrimSpace(string(secret))
-}
-
 func InitDB() *gorm.DB {
-	pg_user := getSecret("/run/secrets/pg_user")
-	pg_password := getSecret("/run/secrets/pg_password")
+	pg_user := os.Getenv("POSTGRES_USER")
+	pg_password := os.Getenv("POSTGRES_PASSWORD")
 	pg_host := "postgres"
 	database_name := "gau_services_db"
 
@@ -38,6 +29,7 @@ func InitDB() *gorm.DB {
 	var err error
 
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
