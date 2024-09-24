@@ -9,10 +9,9 @@ import (
 )
 
 func main() {
-	var err error
-	err = godotenv.Load()
+	err := godotenv.Load("/app/.env")
 	if err != nil {
-		log.Fatal(".env file not found!")
+		log.Fatalf("Error loading .env file")
 	}
 	db := config.InitDB()
 	router := routes.SetupRouter(db)
