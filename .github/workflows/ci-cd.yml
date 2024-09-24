@@ -59,10 +59,10 @@ jobs:
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && docker-compose stop golang-user-services"
+      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && docker-compose stop gauapi"
 
     - name: Build and start-services
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && docker-compose up -d --build golang-user-services"
+      run: ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && docker-compose up -d --build gauapi"
