@@ -11,8 +11,6 @@ RUN go build -o /app/main
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
-
 COPY --from=builder /app/main /app/main
 
 COPY .env /app/.env
