@@ -18,7 +18,19 @@ type RequestReceive struct {
 	ExternalToken *string `json:"ExternalToken"`
 }
 
-// CREATE USER
+type UserResponse struct {
+	UserId      uint   `json:"user_id"`
+	Name        string `json:"name"`
+	Phone       string `json:"phone"`
+	Email       string `json:"email"`
+	DateOfBirth string `json:"date_of_birth"`
+}
+
+type UserToken struct {
+	UserId     string `json:"user_id"`
+	Permission string `json:"permission"`
+}
+
 func CreateUser(c *gin.Context, r RequestReceive) {
 	db := c.MustGet("db").(*gorm.DB)
 
@@ -56,19 +68,22 @@ func CreateUser(c *gin.Context, r RequestReceive) {
 	c.JSON(http.StatusOK, gin.H{"message": "User successfully created"})
 }
 
-// GET USER
-type UserResponse struct {
-	UserId      uint   `json:"user_id"`
-	Name        string `json:"name"`
-	Phone       string `json:"phone"`
-	Email       string `json:"email"`
-	DateOfBirth string `json:"date_of_birth"`
-}
-
 func GetUserById(c *gin.Context) {
 
 	db := c.MustGet("db").(*gorm.DB)
 	id := c.Param("id")
+
+	token, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userToken := token.(*UserToken)
+	if userToken.UserId != id && userToken.Permission != "admin" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 
 	var user models.User
 	var userInfo models.UserInformation
@@ -115,8 +130,6 @@ func toString(value *string) string {
 	}
 	return *value
 }
-
-//DELETE USER
 
 func DeleteUserById(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
