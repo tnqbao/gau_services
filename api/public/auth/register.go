@@ -1,28 +1,28 @@
-package controllers
+package api_user
 
 import (
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tnqbao/gau_services/controllers/encrypt"
+	provider "github.com/tnqbao/gau_services/api"
+	api_user_authed "github.com/tnqbao/gau_services/api/authed/user"
 )
 
 func Register(c *gin.Context) {
-	var req RequestReceive
-
+	var req provider.ClientReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Println("UserRequest binding error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "UserRequest binding error: " + err.Error()})
 		return
 	}
-	*req.Password = encrypt.HashPassword(*req.Password)
-	if (req.Username == nil || req.Password == nil) && req.ExternalToken == nil {
+	*req.Password = provider.HashPassword(*req.Password)
+	if req.Username == nil || req.Password == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Either Username and Password or ExternalToken must be provided"})
 		return
 	}
 
 	log.Println("Parsed Request:", req)
 
-	CreateUser(c, req)
+	api_user_authed.CreateUser(c, req)
 }
