@@ -12,20 +12,21 @@ import (
 
 func CreateUser(c *gin.Context, r provider.ClientReq) {
 	db := c.MustGet("db").(*gorm.DB)
-	userAuth := models.UserAuthentication{
-		Username: r.Username,
-		Password: r.Password,
-	}
-	userInfor := models.UserInformation{
-		Fullname:    r.Fullname,
-		Email:       r.Email,
-		DateOfBirth: r.DateOfBirth,
-	}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		user := models.User{}
 		user.Permission = "member"
-		userAuth.UserId = user.UserId
-		userInfor.UserId = user.UserId
+		userAuth := models.UserAuthentication{
+			Username: r.Username,
+			Password: r.Password,
+			UserId:   user.UserId,
+		}
+		userInfor := models.UserInformation{
+			Fullname:    r.Fullname,
+			Email:       r.Email,
+			DateOfBirth: provider.FormatStringToDate(r.DateOfBirth),
+			UserId:      user.UserId,
+		}
+
 		if err := tx.Create(&userAuth).Error; err != nil {
 			return err
 		}

@@ -59,7 +59,7 @@ func GetUserById(c *gin.Context) {
 		UserId:     user.UserId,
 		Fullame:    provider.ToString(userInfo.Fullname),
 		Email:      provider.ToString(userInfo.Email),
-		DateBirth:  provider.ToString(userInfo.DateOfBirth),
+		DateBirth:  provider.FormatDateToString(userInfo.DateOfBirth),
 		Permission: user.Permission,
 	}
 	c.Set("user_permission", user.Permission)
