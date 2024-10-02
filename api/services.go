@@ -24,14 +24,14 @@ func FormatDateToString(date *time.Time) string {
 	if date == nil {
 		return ""
 	}
-	return date.Format("2000-01-01")
+	return date.Format("2006-01-02")
 }
 
 func FormatStringToDate(date *string) *time.Time {
 	if date == nil || *date == "" {
 		return nil
 	}
-	parsedDate, err := time.Parse("2000-01-01", *date)
+	parsedDate, err := time.Parse("2006-01-02", *date)
 	if err != nil {
 		log.Println("Error parsing date:", err)
 		return nil
