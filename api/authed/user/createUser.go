@@ -27,7 +27,8 @@ func CreateUser(c *gin.Context, r provider.ClientReq) {
 		}
 		userInfor := models.UserInformation{
 			Fullname:    r.Fullname,
-			Email:       r.Email,
+			Email:       provider.CheckNullString(r.Email),
+			Phone:       provider.CheckNullString(r.Phone),
 			DateOfBirth: provider.FormatStringToDate(r.DateOfBirth),
 			UserId:      userAuth.UserId,
 		}

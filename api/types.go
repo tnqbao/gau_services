@@ -7,6 +7,7 @@ type ClientReq struct {
 	Password    *string `json:"password"`
 	Fullname    *string `json:"fullname"`
 	Email       *string `json:"email"`
+	Phone       *string `json:"phone"`
 	DateOfBirth *string `json:"date_of_birth"`
 }
 
@@ -14,6 +15,7 @@ type ServerResp struct {
 	UserId     uint   `json:"user_id"`
 	Fullame    string `json:"fullname"`
 	Email      string `json:"email"`
+	Phone      string `json:"phone"`
 	DateBirth  string `json:"date_of_birth"`
 	Permission string `json:"permission"`
 }

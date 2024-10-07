@@ -31,5 +31,6 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			authRoutes.POST("/login", api_public_auth.Authentication)
 		}
 	}
+
 	return r
 }
