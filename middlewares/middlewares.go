@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -11,10 +12,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// cosrs middleware
 func CORSMiddleware() gin.HandlerFunc {
+	domains := os.Getenv("LIST_DOMAIN")
+	domainList := strings.Split(domains, "^")
 	return cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     domainList,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
@@ -23,7 +25,6 @@ func CORSMiddleware() gin.HandlerFunc {
 	})
 }
 
-// auth middleware
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("auth_token")

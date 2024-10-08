@@ -31,7 +31,7 @@ func Authentication(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &provider.ClaimsResponse{
 		UserID: user.UserId,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,7 +44,7 @@ func Authentication(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
-	c.SetCookie("auth_token", tokenString, 3600*24, "/", "", false, true)
+	c.SetCookie("auth_token", tokenString, 3600*24*7, "/", os.Getenv("GLOBAL_DOMAIN"), true, true)
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
