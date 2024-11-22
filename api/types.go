@@ -28,3 +28,15 @@ type ClaimsResponse struct {
 	UserID uint `json:"user_id"`
 	jwt.RegisteredClaims
 }
+
+// login
+type ServerResponseLogin struct {
+	UserId   uint   `json:"user_id"`
+	Fullname string `json:"fullname"`
+}
+
+type ClientRequestLogin struct {
+	Username  *string `json:"username"`
+	Password  *string `json:"password"`
+	KeepLogin *string `json:"keepMeLogin"`
+}

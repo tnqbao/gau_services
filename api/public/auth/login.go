@@ -9,12 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	provider "github.com/tnqbao/gau_services/api"
-	"github.com/tnqbao/gau_services/models"
 	"gorm.io/gorm"
 )
 
 func Authentication(c *gin.Context) {
-	var req models.UserAuthentication
+	var req provider.ClientRequestLogin
 	jwtKey := os.Getenv("JWT_SECRET")
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Println("UserRequest binding error:", err)
@@ -31,7 +30,9 @@ func Authentication(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
+
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
+
 	claims := &provider.ClaimsResponse{
 		UserID: user.UserId,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,19 +45,19 @@ func Authentication(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
-	c.SetCookie("auth_token", tokenString, 3600*24*7, "/", os.Getenv("GLOBAL_DOMAIN"), true, true)
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	c.SetCookie("auth_token", tokenString, 3600*24*7, "/", os.Getenv("GLOBAL_DOMAIN"), false, true)
+	c.JSON(http.StatusOK, gin.H{"token": tokenString, "user": user})
 }
 
-func verifyCredentials(c *gin.Context, username, password string) (models.User, error) {
-	var user models.User
+func verifyCredentials(c *gin.Context, username, password string) (provider.ServerResponseLogin, error) {
+	var user provider.ServerResponseLogin
 	db := c.MustGet("db").(*gorm.DB)
 	if err := db.Table("user_authentications").
-		Select("users.user_id, users.permission").
-		Joins("INNER JOIN users ON users.user_id = user_authentications.user_id").
+		Select("user_authentications.user_id, user_informations.fullname").
+		Joins("INNER JOIN user_informations ON user_informations.user_id = user_authentications.user_id").
 		Where("user_authentications.username = ? AND user_authentications.password = ?", username, password).
 		First(&user).Error; err != nil {
-		return models.User{}, err
+		return provider.ServerResponseLogin{}, err
 	}
 	return user, nil
 }

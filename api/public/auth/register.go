@@ -18,7 +18,7 @@ func Register(c *gin.Context) {
 	}
 	*req.Password = provider.HashPassword(*req.Password)
 	if req.Username == nil || req.Password == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Either Username and Password or ExternalToken must be provided"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username and Password must be provided"})
 		return
 	}
 
