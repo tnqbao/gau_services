@@ -45,7 +45,13 @@ func Authentication(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
-	c.SetCookie("auth_token", tokenString, 3600*24*7, "/", os.Getenv("GLOBAL_DOMAIN"), false, true)
+	var timeExpired int
+	if req.KeepLogin != nil && *req.KeepLogin == "true" {
+		timeExpired = 3600 * 24 * 30
+	} else {
+		timeExpired = 0
+	}
+	c.SetCookie("auth_token", tokenString, timeExpired, "/", os.Getenv("GLOBAL_DOMAIN"), false, true)
 	c.JSON(http.StatusOK, gin.H{"token": tokenString, "user": user})
 }
 
