@@ -29,6 +29,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		{
 			authRoutes.POST("/register", api_public_auth.Register)
 			authRoutes.POST("/login", api_public_auth.Authentication)
+			authRoutes.POST("/logout", middlewares.AuthMiddleware(), api_public_auth.Logout)
 			authRoutes.GET("/check", api_public_auth.HealthCheck)
 		}
 	}
