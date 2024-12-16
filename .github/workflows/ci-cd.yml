@@ -49,7 +49,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/.operator
-            sh restart_gau_user_service.sh
             cd ~/gau
             sh start.sh
