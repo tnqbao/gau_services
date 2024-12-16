@@ -1,32 +1,32 @@
-# name: deploy-ci-cd
+name: deploy-ci-cd
 
-# on: 
-#   push:
-#     branches:
-#       - main
+on: 
+  push:
+    branches:
+      - main
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-#       - name: Create SSH directory
-#         run: mkdir -p ~/.ssh
+      - name: Create SSH directory
+        run: mkdir -p ~/.ssh
 
-#       - name: Add SSH private key
-#         run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      - name: Add SSH private key
+        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
 
-#       - name: Set permissions for SSH key
-#         run: chmod 600 ~/.ssh/id_rsa
+      - name: Set permissions for SSH key
+        run: chmod 600 ~/.ssh/id_rsa
 
-#       - name: SSH connect, pull latest code, and restart Docker
-#         env:
-#           SERVER_USER: ${{ secrets.SERVER_USER }}
-#           SERVER_HOST: ${{ secrets.SERVER_HOST }}
-#         run: |
-#           ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && sudo chmod +x gauapi.sh && ./gauapi.sh"
-#       - name: Remove SSH key
-#         run: rm ~/.ssh/id_rsa
+      - name: SSH connect, pull latest code, and restart Docker
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /home/debian/gau && sudo chmod +x gauapi.sh && ./gauapi.sh"
+      - name: Remove SSH key
+        run: rm ~/.ssh/id_rsa
