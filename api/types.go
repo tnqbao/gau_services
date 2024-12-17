@@ -20,19 +20,17 @@ type ServerResp struct {
 	Permission string `json:"permission"`
 }
 
-type UserToken struct {
-	UserId string `json:"user_id"`
-}
-
 type ClaimsResponse struct {
-	UserID uint `json:"user_id"`
+	UserID         uint   `json:"user_id"`
+	UserPermission string `json:"user_permission"`
 	jwt.RegisteredClaims
 }
 
 // login
 type ServerResponseLogin struct {
-	UserId   uint   `json:"user_id"`
-	Fullname string `json:"fullname"`
+	UserId     uint   `json:"user_id"`
+	Permission string `json:"permission"`
+	FullName   string `json:"fullname"`
 }
 
 type ClientRequestLogin struct {

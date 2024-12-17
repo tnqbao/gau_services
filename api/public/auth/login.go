@@ -34,7 +34,8 @@ func Authentication(c *gin.Context) {
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 
 	claims := &provider.ClaimsResponse{
-		UserID: user.UserId,
+		UserID:         user.UserId,
+		UserPermission: user.Permission,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -59,7 +60,7 @@ func verifyCredentials(c *gin.Context, username, password string) (provider.Serv
 	var user provider.ServerResponseLogin
 	db := c.MustGet("db").(*gorm.DB)
 	if err := db.Table("user_authentications").
-		Select("user_authentications.user_id, user_informations.fullname").
+		Select("user_authentications.user_id, user_authentications.permission , user_informations.fullname, ").
 		Joins("INNER JOIN user_informations ON user_informations.user_id = user_authentications.user_id").
 		Where("user_authentications.username = ? AND user_authentications.password = ?", username, password).
 		First(&user).Error; err != nil {

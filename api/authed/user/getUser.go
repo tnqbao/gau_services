@@ -12,30 +12,33 @@ import (
 func GetUserById(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
 	id := c.Param("id")
-	token, exists := c.Get("user_id")
+	tokenId, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	userToken := token.(*provider.UserToken)
 
-	userPermission, exists := c.Get("user_permission")
-	if !exists {
-		userPermission = "member"
+	userPermissionStr := "member"
+	if userPermission, exists := c.Get("user_permission"); exists {
+		if val, ok := userPermission.(string); ok {
+			userPermissionStr = val
+		}
 	}
 
-	userPermissionStr, ok := userPermission.(string)
+	tokenIdStr, ok := tokenId.(string)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid permission format"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid id format"})
 		return
 	}
 
-	if userToken.UserId != id && userPermissionStr != "admin" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+	if tokenIdStr != id {
+		if userPermissionStr != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to access this resource!"})
+			return
+		}
 	}
 
-	var user models.User
+	var user models.UserAuthentication
 	var userInfo models.UserInformation
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.First(&user, "user_id = ?", id).Error; err != nil {
@@ -57,11 +60,10 @@ func GetUserById(c *gin.Context) {
 	}
 	response := provider.ServerResp{
 		UserId:     user.UserId,
-		Fullame:    provider.ToString(userInfo.Fullname),
+		Fullame:    provider.ToString(userInfo.FullName),
 		Email:      provider.ToString(userInfo.Email),
 		DateBirth:  provider.FormatDateToString(userInfo.DateOfBirth),
 		Permission: user.Permission,
 	}
-	c.Set("user_permission", user.Permission)
 	c.JSON(http.StatusOK, response)
 }

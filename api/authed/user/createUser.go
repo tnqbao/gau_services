@@ -14,27 +14,20 @@ func CreateUser(c *gin.Context, r provider.ClientReq) {
 	db := c.MustGet("db").(*gorm.DB)
 	err := db.Transaction(func(tx *gorm.DB) error {
 		userAuth := models.UserAuthentication{
-			Username: r.Username,
-			Password: r.Password,
+			Username:   r.Username,
+			Password:   r.Password,
+			Permission: "member",
 		}
 		if err := tx.Create(&userAuth).Error; err != nil {
 			return err
 		}
 
-		user := models.User{
-			Permission: "member",
-			UserId:     userAuth.UserId,
-		}
 		userInfor := models.UserInformation{
-			Fullname:    r.Fullname,
+			FullName:    r.Fullname,
 			Email:       provider.CheckNullString(r.Email),
 			Phone:       provider.CheckNullString(r.Phone),
 			DateOfBirth: provider.FormatStringToDate(r.DateOfBirth),
 			UserId:      userAuth.UserId,
-		}
-
-		if err := tx.Create(&user).Error; err != nil {
-			return err
 		}
 
 		if err := tx.Create(&userInfor).Error; err != nil {
