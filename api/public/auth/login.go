@@ -27,7 +27,7 @@ func Authentication(c *gin.Context) {
 	hashedPassword := provider.HashPassword(*req.Password)
 	user, err := verifyCredentials(c, *req.Username, hashedPassword)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "username or password invalid!"})
 		return
 	}
 
@@ -60,7 +60,7 @@ func verifyCredentials(c *gin.Context, username, password string) (provider.Serv
 	var user provider.ServerResponseLogin
 	db := c.MustGet("db").(*gorm.DB)
 	if err := db.Table("user_authentications").
-		Select("user_authentications.user_id, user_authentications.permission , user_informations.fullname, ").
+		Select("user_authentications.user_id, user_authentications.permission , user_informations.full_name").
 		Joins("INNER JOIN user_informations ON user_informations.user_id = user_authentications.user_id").
 		Where("user_authentications.username = ? AND user_authentications.password = ?", username, password).
 		First(&user).Error; err != nil {

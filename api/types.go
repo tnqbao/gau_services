@@ -22,7 +22,7 @@ type ServerResp struct {
 
 type ClaimsResponse struct {
 	UserID         uint   `json:"user_id"`
-	UserPermission string `json:"user_permission"`
+	UserPermission string `json:"permission"`
 	jwt.RegisteredClaims
 }
 

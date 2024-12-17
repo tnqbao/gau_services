@@ -11,7 +11,18 @@ import (
 
 func UpdateUserInformation(c *gin.Context) {
 	db := c.MustGet("db").(*gorm.DB)
-	id := c.Param("id")
+
+	tokenId, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user_id not found"})
+		return
+	}
+
+	tokenIdUint, ok := tokenId.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user_id format"})
+		return
+	}
 
 	userUpate := models.UserInformation{}
 	if err := c.ShouldBindJSON(&userUpate); err != nil {
@@ -23,7 +34,7 @@ func UpdateUserInformation(c *gin.Context) {
 	var userInfor models.UserInformation
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&userInfor, "user_id = ?", id).Error; err != nil {
+		if err := tx.First(&userInfor, "user_id = ?", tokenIdUint).Error; err != nil {
 			return err
 		}
 		db.Model(&userInfor).Updates(userUpate)

@@ -21,7 +21,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		userRoutes := apiRoutes.Group("/user")
 		{
 			userRoutes.Use(middlewares.AuthMiddleware())
+
 			userRoutes.GET("/:id", api_authed_user.GetUserById)
+			userRoutes.GET("/me", api_authed_user.GetMe)
+
 			userRoutes.DELETE("/delete", api_authed_user.DeleteUserById)
 			userRoutes.PUT("/update", api_authed_user.UpdateUserInformation)
 		}
