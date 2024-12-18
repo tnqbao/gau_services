@@ -19,7 +19,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		AllowOrigins:     domainList,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length", "Authorization", "Set-Cookie"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	})
@@ -29,10 +29,15 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("auth_token")
 		if err != nil {
+			tokenString = c.GetHeader("Authorization")
+		}
+
+		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization cookie is required"})
 			c.Abort()
 			return
 		}
+
 		token, err := validateToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

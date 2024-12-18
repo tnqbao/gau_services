@@ -65,6 +65,7 @@ func GetUserById(c *gin.Context) {
 		UserId:     user.UserId,
 		Fullame:    provider.ToString(userInfo.FullName),
 		Email:      provider.ToString(userInfo.Email),
+		Phone:      provider.ToString(userInfo.Phone),
 		DateBirth:  provider.FormatDateToString(userInfo.DateOfBirth),
 		Permission: user.Permission,
 	}
@@ -103,6 +104,7 @@ func GetMe(c *gin.Context) {
 		UserId:     user.UserId,
 		Fullame:    provider.ToString(userInfo.FullName),
 		Email:      provider.ToString(userInfo.Email),
+		Phone:      provider.ToString(userInfo.Phone),
 		DateBirth:  provider.FormatDateToString(userInfo.DateOfBirth),
 		Permission: user.Permission,
 	}
